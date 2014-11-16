@@ -1,7 +1,16 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
+This assignment uses two months of data from a personal activity monitoring device 
+collected at 5 minute intervals throughout the day during October and November 2012.
 
 ## Loading and preprocessing the data
+
+In step 1, the data file is loaded and prepared for analysis.
 
 
 ```r
@@ -25,44 +34,60 @@ activitydata <- tbl_df(activity)
 
 ## What is mean total number of steps taken per day?
 
+For step 2, the data is grouped by day to answer questions about total number of 
+steps taken per day.
+
 
 ```r
-options(scipen = 1, digits = 2)
-
+# group data by date
 DayGroup <- group_by(activitydata, date)
 
+# calculate total number of steps per day
 StepsPerDay <- summarise(DayGroup, steps = sum(steps, na.rm=TRUE))
 
-hist(StepsPerDay$steps)
+# create histogram to show frequency of total number of steps taken per day
+hist(StepsPerDay$steps, xlab="Steps Taken Per Day",
+     main="Total Number of Steps Taken Per Day")
 ```
 
-![](./PA1_template_files/figure-html/chunk2-1.png) 
+![plot of chunk chunk2](figure/chunk2-1.png) 
 
 ```r
+# set options for display of mean and median calculations below
+options(scipen = 1, digits = 2)
+
+# calculate the mean and median steps per day
 MeanStepsPerDay <- mean(StepsPerDay$steps)
 MedianStepsPerDay <- median(StepsPerDay$steps)
 ```
 
-The mean steps per day is 9354.23  
-The median steps per day is 10395  
+The mean steps taken each day is 9354.23  
+The median steps taken each day is 10395  
   
     
 
 ## What is the average daily activity pattern?
 
+Step 3 looks at the data grouped by 5 minute interval to find out the part of the
+day when the most steps are taken.
+
 
 ```r
+# group data by interval
 IntervalGroup <- group_by(activitydata, interval)
 
+# calculate average number of steps per interval
 IntervalMeanSteps <- summarise(IntervalGroup, MeanSteps = mean(steps, na.rm=TRUE))
 
+# create a plot showing average number of steps taken per interval
 plot(IntervalMeanSteps, type="l", xlab="Interval", ylab="Average Number of Steps",
      main="Average Daily Activity Pattern")
 ```
 
-![](./PA1_template_files/figure-html/chunk3-1.png) 
+![plot of chunk chunk3](figure/chunk3-1.png) 
 
 ```r
+# find the interval with the highest number of steps taken on average
 max <- max(IntervalMeanSteps$MeanSteps)
 maxInterval <- filter(IntervalMeanSteps, IntervalMeanSteps$MeanSteps==max)
 ```
@@ -70,6 +95,9 @@ maxInterval <- filter(IntervalMeanSteps, IntervalMeanSteps$MeanSteps==max)
 5-minute interval with maximum number of steps on average: 835  
 
 ## Imputing missing values
+
+In step 4, missing values in the step data are imputed with the average number
+of steps taken per interval, as calulated in step 3.
 
 
 ```r
@@ -81,7 +109,8 @@ TotalNAs <- sum(is.na(activitydata$steps))
 # My strategy is to impute values based on the average steps taken during each
 # 5-min interval, as calculated in the last section.
 
-# 4.3 - Create a new dataset that is equal to the original dataset but with...
+# 4.3 - Create a new dataset that is equal to the original dataset but with
+# the missing data filled in.
 
 # create function to impute mean for NAs
 NAforMean <- function(x) ifelse(is.na(x), mean(x, na.rm=TRUE), x)
@@ -92,23 +121,29 @@ activitydata2 <- activitydata %>%
         mutate_each(funs(NAforMean), steps)
 
 # 4.4 - Make a histogram of the total number of steps taken each day and...
+# calculate and report the mean and median total number of steps taken per day.
 
+# group data from the new data set by date
 DayGroup2 <- group_by(activitydata2, date)
 
+# calculate the total number of steps taken each day 
 StepsPerDay2 <- summarise(DayGroup2, steps = sum(steps))
 
-hist(StepsPerDay2$steps)
+# create a histogram showing total number of steps taken per day
+hist(StepsPerDay2$steps, xlab="Steps Taken Per Day",
+     main="Total Number of Steps Taken Per Day (w/Missing Data Imputed)")
 ```
 
-![](./PA1_template_files/figure-html/chunk4-1.png) 
+![plot of chunk chunk4](figure/chunk4-1.png) 
 
 ```r
+# calculate the mean and median steps per day
 MeanStepsPerDay2 <- mean(StepsPerDay2$steps)
 MedianStepsPerDay2 <- median(StepsPerDay2$steps)
 ```
 
-The mean steps per day is 10766.19  
-The median steps per day is 10766.19  
+The mean steps taken each day is 10766.19  
+The median steps taken each day is 10766.19  
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -118,33 +153,40 @@ The median steps per day is 10766.19
 
 # convert date to Date format
 activitydata2$date2 <- as.Date(activitydata2$date, "%Y-%m-%d")
+
 # return day of week from new Date
 activitydata2$Weekday <- weekdays(activitydata2$date2)
+
+# create a new factor variable called DayType 
 activitydata2$DayType <- "weekday"
 activitydata2$DayType[activitydata2$Weekday== "Saturday"] <- "weekend" 
 activitydata2$DayType[activitydata2$Weekday== "Sunday"] <- "weekend" 
 
 # 5.2 - Make a panel plot containing a time series plot
 
+# group data by interval and DayType
 IntervalGroup2 <- group_by(activitydata2, interval, DayType)
 
+# calculate mean number of steps by groupings
 IntervalMeanSteps2 <- summarise(IntervalGroup2, MeanSteps = mean(steps))
 
+# set paramaters for panel plots
 par(mfrow=c(2,1), mar=c(4,4,2,1)) 
 
+# split data for plotting
 weekdayData <- filter(IntervalMeanSteps2, DayType=="weekday")
 weekdayData <- select(weekdayData, interval, MeanSteps)
 weekendData <- filter(IntervalMeanSteps2, DayType=="weekend")
 weekendData <- select(weekendData, interval, MeanSteps)
 
-
+# create plots comparing average number of steps on weekdays vs weekends
 plot(weekdayData, type="l", xlab="Interval", ylab="Number of Steps",
      main="weekday")
 plot(weekendData, type="l", xlab="Interval", ylab="Number of Steps",
      main="weekend")
 ```
 
-![](./PA1_template_files/figure-html/chunk5-1.png) 
+![plot of chunk chunk5](figure/chunk5-1.png) 
 
 
 
