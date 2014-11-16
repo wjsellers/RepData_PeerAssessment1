@@ -1,14 +1,10 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
-```{r chunk1, echo=TRUE, message=FALSE}
+
+```r
 # unzip file
 unzip(zipfile="./activity.zip", exdir="./")
 
@@ -29,8 +25,8 @@ activitydata <- tbl_df(activity)
 
 ## What is mean total number of steps taken per day?
 
-```{r chunk2, echo=TRUE}
 
+```r
 options(scipen = 1, digits = 2)
 
 DayGroup <- group_by(activitydata, date)
@@ -38,35 +34,45 @@ DayGroup <- group_by(activitydata, date)
 StepsPerDay <- summarise(DayGroup, steps = sum(steps, na.rm=TRUE))
 
 hist(StepsPerDay$steps)
+```
 
+![](./PA1_template_files/figure-html/chunk2-1.png) 
+
+```r
 MeanStepsPerDay <- mean(StepsPerDay$steps)
 MedianStepsPerDay <- median(StepsPerDay$steps)
 ```
 
-The mean steps per day is `r MeanStepsPerDay`  
-The median steps per day is `r MedianStepsPerDay`  
+The mean steps per day is 9354.23  
+The median steps per day is 10395  
   
     
 
 ## What is the average daily activity pattern?
 
-```{r chunk3, echo=TRUE}
+
+```r
 IntervalGroup <- group_by(activitydata, interval)
 
 IntervalMeanSteps <- summarise(IntervalGroup, MeanSteps = mean(steps, na.rm=TRUE))
 
 plot(IntervalMeanSteps, type="l", xlab="Interval", ylab="Average Number of Steps",
      main="Average Daily Activity Pattern")
+```
 
+![](./PA1_template_files/figure-html/chunk3-1.png) 
+
+```r
 max <- max(IntervalMeanSteps$MeanSteps)
 maxInterval <- filter(IntervalMeanSteps, IntervalMeanSteps$MeanSteps==max)
 ```
 
-5-minute interval with maximum number of steps on average: `r maxInterval$interval`  
+5-minute interval with maximum number of steps on average: 835  
 
 ## Imputing missing values
 
-```{r chunk4, echo=TRUE}
+
+```r
 # 4.1 - Calculate and report the total number of missing values in the dataset
 TotalNAs <- sum(is.na(activitydata$steps))
 
@@ -92,17 +98,22 @@ DayGroup2 <- group_by(activitydata2, date)
 StepsPerDay2 <- summarise(DayGroup2, steps = sum(steps))
 
 hist(StepsPerDay2$steps)
+```
 
+![](./PA1_template_files/figure-html/chunk4-1.png) 
+
+```r
 MeanStepsPerDay2 <- mean(StepsPerDay2$steps)
 MedianStepsPerDay2 <- median(StepsPerDay2$steps)
 ```
 
-The mean steps per day is `r MeanStepsPerDay2`  
-The median steps per day is `r MedianStepsPerDay2`  
+The mean steps per day is 10766.19  
+The median steps per day is 10766.19  
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r chunk5, echo=TRUE}
+
+```r
 # 5.1 - Create a new factor variable in the dataset with two levels – “weekday” and “weekend” 
 
 # convert date to Date format
@@ -132,6 +143,8 @@ plot(weekdayData, type="l", xlab="Interval", ylab="Number of Steps",
 plot(weekendData, type="l", xlab="Interval", ylab="Number of Steps",
      main="weekend")
 ```
+
+![](./PA1_template_files/figure-html/chunk5-1.png) 
 
 
 
