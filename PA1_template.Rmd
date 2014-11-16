@@ -6,7 +6,7 @@ output:
 ---
 
 This assignment uses two months of data from a personal activity monitoring device 
-collected at 5 minute intervals throughout the day during October and November 2012.
+collected at 5 minute intervals throughout the day during October & November 2012.
 
 ## Loading and preprocessing the data
 
